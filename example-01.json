@@ -1,0 +1,65 @@
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET _search?q=dhaka
+
+GET _search?q=name:engr.tarek
+
+POST users/_create/1
+{
+  "name": "tarek",
+  "position": "software engineer",
+  "address": "feni, dhaka, bd"
+}
+
+GET users/_doc/1
+
+#create document
+POST users/_create/2
+{
+  "name": "engr.tarek monjur",
+  "position": "engineer",
+  "address": "chhagalnaiya, dhaka, bd"
+}
+
+GET users/_count
+
+#update document
+POST users/_doc/2
+{
+  "name": "engr. monjur",
+  "position": "engineer",
+  "address": "chhagalnaiya, dhaka, bd"
+}
+
+# delete index document
+DELETE users/_doc/1
+
+# delete index
+DELETE users
+
+POST users/_create/3
+{
+  "name": "engr.tarek monjur",
+  "position": "engineer",
+  "bod": "1992-09-21",
+  "address": "chhagalnaiya, dhaka, bd"
+}
+
+GET users
+
+PUT users
+{
+  "mappings": {
+    "properties": {
+      "bod": {
+        "type": "date",
+        "index": false
+      }
+    }
+  }
+}

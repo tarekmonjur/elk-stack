@@ -1,0 +1,47 @@
+version: "3.2"
+
+networks:
+  elk-stack:
+    driver: bridge
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    restart: always
+    ports:
+      - ${ES_PORT}:9200
+      - 9300:9300
+    volumes:
+      - elastic-data:/usr/share/elasticsearch/data
+    networks:
+      - elk-stack  
+    environment:
+      - discovery.type=single-node
+      - cluster.name=${CLUSTER_NAME}
+      - node.name=${NODE_NAME}
+      # - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+      - xpack.security.enabled=false
+      - xpack.security.http.ssl.enabled=false
+      - ingest.geoip.downloader.enabled=false
+    # mem_limit: ${MEM_LIMIT}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    restart: always
+    depends_on:
+      - elasticsearch
+    ports:
+      - ${KIBANA_PORT}:5601
+    networks:
+      - elk-stack
+    environment:
+      - SERVERNAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:${ES_PORT}
+
+volumes:
+  elastic-data:
+    driver: local

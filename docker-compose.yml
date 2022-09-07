@@ -17,6 +17,7 @@ services:
       - elk-stack  
     environment:
       - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xmx512m -Xms512m
       - cluster.name=${CLUSTER_NAME}
       - node.name=${NODE_NAME}
       # - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -29,6 +30,24 @@ services:
         soft: -1
         hard: -1
 
+  logstash:
+    image: docker.elastic.co/logstash/logstash:${STACK_VERSION}
+    ports:
+      - 5000:5000
+      - ${LS_PORT}:9600
+    volumes:
+      - ./logstash/config/:/usr/share/logstash/config/
+      - ./logstash/pipeline/:/usr/share/logstash/pipeline/
+      - ./logstash/data/access.log:/usr/share/logstash/data/access.log
+    networks:
+      - elk-stack
+    depends_on:
+      - elasticsearch
+    environment:
+      LS_JAVA_OPTS: "-Xmx512m -Xms512m"
+      ES_HOST: ${ES_HOST}
+      ES_PORT: ${ES_PORT}
+
   kibana:
     image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
     restart: always
@@ -40,7 +59,7 @@ services:
       - elk-stack
     environment:
       - SERVERNAME=kibana
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:${ES_PORT}
+      - ELASTICSEARCH_HOSTS=http://${ES_HOST}:${ES_PORT}
 
 volumes:
   elastic-data:
